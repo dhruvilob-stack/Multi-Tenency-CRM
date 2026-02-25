@@ -349,3 +349,289 @@ Database:
 - All tables scoped by `tenant_id`
 
 ---
+
+
+
+
+
+
+
+
+
+
+
+
+
+  ###  A. Create Products (Catalog)
+
+  Where: Manufacturer Panel → Products
+  Fields to fill:
+
+  - Manufacturer (organization)
+  - Name
+  - SKU
+  - Brand
+  - Category
+  - Price (cents)
+  - Active
+  - Description
+
+  Who can update? Manufacturer only
+  Why important? Products are consumed by organizations for purchase orders.
+
+  ———
+
+  ### B. Define BOM (Bill of Materials)
+
+  Where: BOM Items
+  Fields:
+
+  - Product
+  - Raw Material
+  - Quantity Required
+
+  Who can update? Manufacturer only
+  Purpose: Defines materials needed to produce one product.
+
+  ———
+
+  ### C. Production Orders
+
+  Where: Production Orders
+  Fields:
+
+  - Product
+  - Order Number
+  - Quantity Planned
+  - Quantity Completed
+  - Status (Draft → In Production → Completed)
+  - Start/Completed date
+
+  Who can update? Manufacturer
+  Flow: This is the production tracking unit.
+
+  ———
+
+  ### D. Inventory Monitoring
+
+  Where: Inventory Items
+  Fields:
+
+  - Product
+  - Quantity on Hand
+  - Reorder Threshold
+
+  Who can update? Manufacturer
+  Used for: Stock monitoring & reorder alerts.
+
+  ———
+
+  ### E. Supplier Management
+
+  Where: Suppliers
+
+  - Add suppliers or invite in org panel (depending on flow)
+  - Tracks supplier status
+
+  ———
+
+  ### F. Purchase Orders (Raw materials)
+
+  Where: Purchase Orders
+  Fields:
+
+  - Buyer (manufacturer org)
+  - Supplier (supplier org)
+  - Order Number
+  - Status
+  - Total Amount
+
+  Who updates? Manufacturer
+  Purpose: Orders raw materials from suppliers.
+
+  ———
+
+  ### G. Dispatch Orders (Outbound)
+
+  Where: Dispatch Orders
+  Fields:
+
+  - PO
+  - Dispatch Number
+  - Status
+  - Dispatched Date
+
+  Who updates? Manufacturer
+  Purpose: Shipment to buyer organizations.
+
+  ———
+
+  ### H. Quality Reports
+
+  Where: Quality Reports
+  Fields:
+
+  - Production Order
+  - Status (Passed/Failed)
+  - Inspection Date
+  - Notes
+
+  ———
+
+  # 2) Organization Demo (Buyer Panel)
+
+  ### A. View Products
+
+  Where: Products
+  Shows manufacturer’s catalog.
+
+  ———
+
+  ### B. Create Purchase Order
+
+  Where: Purchase Orders
+  Fields:
+
+  - Buyer (auto locked to this org)
+  - Supplier (list of suppliers only)
+  - Order Number
+  - Status (Draft → Submitted → Approved → In Production → Dispatched → Delivered → Completed)
+  - Total Amount
+
+  Who can update? Organization Admin
+  Flow: This order becomes visible to supplier.
+
+  ———
+
+  ### C. GRN (Goods Receipt Note)
+
+  Where: GRN
+  Fields:
+
+  - PO
+  - Received By
+  - Received Date
+  - Status
+
+  ———
+
+  ### D. Invoices
+
+  Where: Invoices
+  Fields:
+
+  - PO
+  - Invoice Number
+  - Amount
+  - Tax
+  - Due Date
+  - Status (Pending/Paid/Overdue)
+
+  ———
+
+  ### E. Payments
+
+  Where: Payments
+  Fields:
+
+  - Invoice
+  - Amount Paid
+  - Mode
+  - Transaction Ref
+  - Status
+
+  ———
+
+  ### F. Users (Organization Members)
+
+  Where: Users
+  Role options only:
+
+  - organization_admin
+  - supplier
+
+  Email is locked on edit
+
+  ———
+
+  # 3) Supplier Demo (Supplier Panel)
+
+  ### A. RFQ Inbox
+
+  Where: RFQs
+  Fields:
+
+  - Buyer
+  - Supplier (auto locked)
+  - RFQ Number
+  - Status
+  - Due Date
+
+  ———
+
+  ### B. Quotations
+
+  Where: Quotations
+  Fields:
+
+  - RFQ
+  - Total Amount
+  - Status (Submitted / Accepted / Rejected)
+
+  ———
+
+  ### C. Purchase Orders
+
+  Where: Purchase Orders
+
+  - Shows buyer’s POs
+
+  ———
+
+  ### D. Shipments
+
+  Where: Shipments
+  Fields:
+
+  - PO
+  - Tracking Number
+  - Status
+  - Shipped / Delivered date
+
+  ———
+
+  ### E. Invoices & Payments
+
+  Same as organization panel, but supplier views only their invoices/payments.
+
+  ———
+
+  # Internal Communication (How data travels)
+
+  ### Example flow:
+
+  1. Manufacturer creates product → visible to organization.
+  2. Organization creates PO → Supplier sees it.
+  3. Supplier ships + invoices → Organization records GRN + payment.
+  4. Manufacturer sees dispatch + revenue data.
+
+  ### Key internal links
+
+  - purchase_orders connect buyer ↔ supplier
+  - invoices connect to PO
+  - payments connect to invoice
+  - rfqs connect buyer ↔ supplier
+  - quotations connect to RFQ
+
+  ———
+
+  # Who Can Update What
+
+  | Module | Can Update |
+  |--------|-------------|
+  | Manufacturer | Products, BOM, Production, Inventory, Purchase Orders, Dispatch, Quality |
+  | Organization | Purchase Orders, GRN, Inventory, Invoices, Payments |
+  | Supplier | RFQ, Quotation, Shipments, Invoices |
+
+  ———
+
