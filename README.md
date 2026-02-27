@@ -567,6 +567,60 @@ Database:
   - Status
   - Due Date
 
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+Assume:
+
+  - Manufacturer = “HQ Manufacturing”
+  - Organization (buyer) = “FreshMart”
+  - Supplier (invited supplier record under FreshMart) = “OilHub Supplier” (suppliers.id = 12)
+  - Product = “Sunflower Oil 1L”
+
+  ### A) Master Catalog (Manufacturer → Everyone sees)
+
+  1. Manufacturer HQ creates Product “Sunflower Oil 1L”.
+  2. System clones it into each active partner org as a read-only clone (master_product_id link).
+  3. Organization sees it in /organization/products but cannot edit, only “View” / “Request change”.
+
+  ### B) Supplier Onboarding (Organization → Supplier → Manufacturer notified)
+
+  (Your existing invitation flow already does this.)
+
+  1. Organization invites supplier → email link → supplier sets password.
+  2. Manufacturer gets notified of invite/join.
+
+  ### C) Demand Creation (Organization RFQ → Supplier Quotation → Org accepts)
+
+  1. Organization Portal → Operations → RFQs → “New RFQ”
+      - Buyer auto = FreshMart
+      - Supplier = “OilHub Supplier (email…)”
+      - Due date set
+      - Status = open
+  2. On save, system sends notifications:
+      - Supplier Hub: “New RFQ received” → links /supplier/rfqs?highlight_id=…
+      - Organization Portal: “RFQ created”
+      - Manufacturer HQ: “RFQ created” → links /super-admin/rfqs?highlight_id=…
+      - (wired in app/Providers/AppServiceProvider.php:1)
+  3. Supplier Hub → Sales → RFQs → opens RFQ (read-only) → creates Quotation in Sales → Quotations
+  4. On quotation submit:
+      - Organization gets “New quotation received”
+      - Manufacturer gets “Quotation submitted”
+  5. Organization Portal → Operations → Quotations → click Accept
+      - Quotation becomes accepted
+      - Other quotations for same RFQ become rejected
+      - RFQ becomes closed
+      - Supplier + Manufacturer get notifications
+
+  ### D) Upward flow from Supplier → Organization → Manufacturer
+
+  - Supplier creates Shipment → Organization notified → Manufacturer notified
+  - Organization creates GRN / Quality report → Supplier notified → Manufacturer notified
+  - Supplier creates Invoice → Organization notified → Manufacturer sees analytics
+  - Organization records Payment → Supplier notified → Manufacturer notified
+
+
   ———
 
   ### B. Quotations
